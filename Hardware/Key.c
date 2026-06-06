@@ -1,0 +1,130 @@
+//#include "stm32f10x.h"                  // Device header
+//#include "Delay.h"
+
+/////*
+////KEY1 - PB1
+////KEY2 - PB0
+////KEY3 - PA5
+////KEY4 - PA4
+
+////*/
+
+///*
+//STBY- PB1
+//*/
+
+///*逻辑：
+
+//先开启定时器（每1ms中断一次）
+//定时器的中断响应程序，就执行以下（即Key_Tick函数）：
+//	判断是否满中断了20次，
+//	如果是，就获取当前键值，刷新“上次键值”
+//	比对上次的键值和当前的键值
+//	判断是否有“上次是按下XX键，当前松开”
+//	如果有，就是XX键被按下
+//	存储该键值（哪个按键被按下）到全局变量Key_Num中
+//在while循环里通过不断获取全局变量Key_Num的值来判断哪个按键被按下
+
+//*/
+
+///*全局变量，用于存储按键键码*/
+//uint8_t Key_Num;
+
+///**
+//  * 函    数：按键初始化
+//  * 参    数：无
+//  * 返 回 值：无
+//  */
+//void Key_Init(void)
+//{
+//	/*开启时钟*/
+//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);	//开启GPIOB的时钟
+//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	//开启GPIOA的时钟
+//	
+//	/*GPIO初始化*/
+//	GPIO_InitTypeDef GPIO_InitStructure;
+//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+////	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1 | GPIO_Pin_0;
+//	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+////	GPIO_Init(GPIOB, &GPIO_InitStructure);					//将PB1和PB0引脚初始化为上拉输入
+////	
+////	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_4;
+////	GPIO_Init(GPIOA, &GPIO_InitStructure);					//将PA5和PA4引脚初始化为上拉输入
+//	GPIO_Init(GPIOB, &GPIO_InitStructure);					//将PB1引脚初始化为上拉输入
+//	
+//}
+
+///**
+//  * 函    数：获取全局变量定义的按键键码
+//  * 参    数：无
+//  * 返 回 值：按键键码 
+//  */
+//uint8_t Key_GetNum(void)
+//{
+//	uint8_t Temp;			//定义一个临时变量用于中转
+//	if (Key_Num)			//如果全局变量的键码不为0（定时器每中断20次，即每20ms，这个Key_Num的值刷新一次，指向正在被按下的那个按键）
+//	{
+//		/*这3句的目的是，实现读取键码并读后清零的效果*/
+//		Temp = Key_Num;		//先把键码存入临时变量
+//		Key_Num = 0;		//键码清零
+//		return Temp;		//返回临时变量，return语句执行后，函数直接结束
+//	}
+//	return 0;				//如果if不成立，键码为0，则默认返回0
+//}
+
+///**
+//  * 函    数：获取按键状态
+//  * 参    数：无
+//  * 返 回 值：有按键按下，直接返回键码（非阻塞），没有按键按下，返回0
+//  */
+//uint8_t Key_GetState(void)
+//{
+//	if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_1) == 0)		//如果PB1引脚电平为0
+//	{
+//		return 1;		//直接返回键码1
+//	}
+////	if (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_0) == 0)		//如果PB0引脚电平为0
+////	{
+////		return 2;		//直接返回键码2
+////	}
+////	if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_5) == 0)		//如果PA5引脚电平为0
+////	{
+////		return 3;		//直接返回键码3
+////	}
+////	if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_4) == 0)		//如果PA4引脚电平为0
+////	{
+////		return 4;		//直接返回键码4
+////	}
+//	return 0;			//没有if成立，表示没有按键按下，默认返回0
+//}
+
+///**
+//  * 函    数：用于驱动按键模块运行的自定义按键定时中断函数
+//  * 参    数：无
+//  * 返 回 值：无
+//  * 注意事项：此函数必须在主程序中每隔1ms自动执行一次
+//  */
+//void Key_Tick(void)
+//{
+//	/*定义静态变量（默认初值为0，函数退出后保留值和存储空间）*/
+//	static uint8_t Count;					//用于计次分频
+//	static uint8_t CurrState, PrevState;	//保存按键本次状态和上次状态
+//	
+//	Count ++;			//计次自增
+//	if (Count >= 20)	//如果计次20次，则if成立，即if每隔20ms进一次
+//	{
+//		Count = 0;		//计次清零，便于下次计次
+//		
+//		/*获取按键的本次状态和上次状态*/
+//		PrevState = CurrState;			//获取上次状态
+//		CurrState = Key_GetState();		//获取本次状态
+//		
+//		/*如果本次状态的键码为0，且上次键码不为0，即检测到按键松手瞬间*/
+//		if (CurrState == 0 && PrevState != 0)
+//		{
+//			/*将上次状态的键码复制给全局变量，后续读取此变量，即可得知哪个按键按下了*/
+//			Key_Num = PrevState;
+//		}
+//	}
+//}
